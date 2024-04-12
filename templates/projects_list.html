@@ -1,0 +1,382 @@
+{% extends "base.html" %}
+{% block title %}Projects List{% endblock %}
+
+{% block content %}
+<!-- Header-->
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<header class="py-3">
+    <div class="container px-1">
+        <div class="row justify-content-center">
+            <div class="bg-light rounded-3 col-lg-12 col-xxl-12">
+                <div class="text-center my-5">
+                    <h1 class="fw-bolder mb-3">Projects List</h1>
+                </div>
+
+                <div class="container-fluid px-1">
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <table id="datatablesSimple">
+                                <thead>
+                                <tr>
+                                    <th>Project</th>
+                                    <th>Cloud Env.</th>
+                                    <th>Architecture Diagram URL</th>
+                                    <!-- <th>Image</th> -->
+                                    <!-- <th>Created Date</th> -->
+                                    <th>Status</th>
+                                    <th></th>
+                                </tr>
+                                </thead>
+
+                                <tbody>
+                                {% for project in projects %}
+                                <tr>
+                                    <td><small>{{ project.project_name }}</small></td>
+                                    <td><small>{{ project.cloud_service_provider }}</small></td>
+                                    <td><small>{{ project.image_url }}</small></td>
+                                    <!-- <td><img src="{{ project.image_url }}" alt="Project Image" width="100"></td> -->
+                                    <!-- <td>{{ project.created_date }}</td> -->
+
+                                    <td>
+                                          {% if project.project_status == 1 %}
+                                            <div class="badge bg-info bg-gradient rounded-pill mb-2">Project Initiated</div>
+                                          {% elif project.project_status == 2 %}
+                                            <div class="badge bg-primary bg-gradient rounded-pill mb-2">Diagram Analysed</div>
+                                          {% elif project.project_status == 3 %}
+                                            <div class="badge bg-success bg-gradient rounded-pill mb-2">JSON Generated</div>
+                                          {% elif project.project_status == 4 %}
+                                            <div class="badge bg-success bg-gradient rounded-pill mb-2">IaC Generated</div>
+                                          {% else %}
+                                            <div class="badge bg-error bg-gradient rounded-pill mb-2">Unknown Status</div>
+                                          {% endif %}
+                                    </td>
+
+                                    <td>
+                                        <form>
+                                            <button class="btn btn-primary btn-sm" type="button" title="View Project Information" id="view-project-metrics-btn" data-toggle="modal" data-target="#projectMetricsModal" data-project-name="{{ project.project_name }}"><i class="bi bi-info-circle"></i></button>
+
+                                            {% if project.project_status == 1 %}
+                                                <!-- 'ANALYSE DIAGRAM' BUTTON -->
+                                                <button class="btn btn-warning btn-sm" type="button" title="Analyse Diagram" id="analyse-diagram-btn" data-project-name="{{ project.project_name }}" data-image-url="{{ project.image_url }}"><i class="bi bi-journal-text"></i></button>
+                                            {% endif %}
+
+                                            {% if project.project_status == 2 or project.project_status == 3 or project.project_status == 4 %}
+                                                <!-- 'VIEW DIAGRAM ANALYSIS' BUTTON -->
+                                                <button class="btn btn-success btn-sm" type="button" title="View Diagram Analysis" id="view-diagram-analysis-btn" data-toggle="modal" data-target="#diagramAnalysisModal" data-project-name="{{ project.project_name }}"><i class="bi bi-journal-text"></i></button>
+
+                                                {% if project.project_status == 2 %}
+                                                    <!-- 'GENERATE JSON' BUTTON -->
+                                                    <button class="btn btn-warning btn-sm" type="button" title="Generate JSON" id="generate-json-btn" data-project-name="{{ project.project_name }}"><i class="bi bi-filetype-json"></i></button>
+                                                {% endif %}
+
+                                                {% if project.project_status == 3 or project.project_status == 4 %}
+                                                    <!-- 'VIEW GENERATED JSON' BUTTON -->
+                                                    <button class="btn btn-success btn-sm" type="button" title="View Generated JSON" id="view-generated-json-btn" data-project-name="{{ project.project_name }}"><i class="bi bi-filetype-json"></i></button>
+
+                                                    {% if project.project_status == 3 %}
+                                                        <!-- 'GENERATE IAC' BUTTON -->
+                                                        <button class="btn btn-warning btn-sm" type="button" title="Generate IaC" id="generate-iac-btn" data-project-name="{{ project.project_name }}"><i class="bi bi-file-code"></i></button>
+                                                    {% endif %}
+
+                                                    {% if project.project_status == 4 %}
+                                                        <!-- 'VIEW GENERATED IAC' BUTTON -->
+                                                        <button class="btn btn-success btn-sm" type="button" title="View Generated IaC" id="view-generated-iac-btn" data-project-name="{{ project.project_name }}"><i class="bi bi-file-code"></i></button>
+                                                    {% endif %}
+                                                {% endif %}
+                                            {% endif %}
+
+
+                                            <!-- Bootstrap Modal - Displaying Project Metrics -->
+                                            <div class="modal fade" id="projectMetricsModal" tabindex="-1" role="dialog" aria-labelledby="projectMetricsModalLabel" aria-hidden="true">
+                                                <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+                                                    <div class="modal-content">
+                                                        <div class="modal-header">
+                                                            <h5 class="modal-title" id="projectMetricsModalLabel">Project Metrics</h5>
+                                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                                <span aria-hidden="true">&times;</span>
+                                                            </button>
+                                                        </div>
+                                                        <div class="modal-body">
+                                                            <p id="project_name" class="text-center"></p>
+                                                            <img id="diagram_url" alt="Project Image" width="760">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Bootstrap Modal - Displaying the Diagram Analysis -->
+                                            <div class="modal fade" id="diagramAnalysisModal" tabindex="-1" role="dialog" aria-labelledby="diagramAnalysisModalLabel" aria-hidden="true">
+                                                <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+                                                    <div class="modal-content">
+                                                        <div class="modal-header">
+                                                            <h5 class="modal-title" id="diagramAnalysisModalLabel">Diagram Analysis</h5>
+                                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                                <span aria-hidden="true">&times;</span>
+                                                            </button>
+                                                        </div>
+                                                        <div class="modal-body">
+                                                            <div id="diagramAnalysisContent" style="height: 400px !important; overflow-y: scroll;"></div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Bootstrap Modal - Displaying the Generated JSON -->
+                                            <div class="modal fade" id="generatedJsonModal" tabindex="-1" role="dialog" aria-labelledby="generatedJsonModalLabel" aria-hidden="true">
+                                                <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+                                                    <div class="modal-content">
+                                                        <div class="modal-header">
+                                                            <h5 class="modal-title" id="generatedJsonModalLabel">Generated JSON</h5>
+                                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                                <span aria-hidden="true">&times;</span>
+                                                            </button>
+                                                        </div>
+                                                        <div class="modal-body">
+                                                            <div id="generatedJsonContent" style="height: 400px !important; overflow-y: scroll;"></div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Bootstrap Modal - Displaying the Generated IaC -->
+                                            <div class="modal fade" id="generatedIacModal" tabindex="-1" role="dialog" aria-labelledby="generatedIacModalLabel" aria-hidden="true">
+                                                <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+                                                    <div class="modal-content">
+                                                        <div class="modal-header">
+                                                            <h5 class="modal-title" id="generatedIacModalLabel">Generated IaC</h5>
+                                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                                <span aria-hidden="true">&times;</span>
+                                                            </button>
+                                                        </div>
+                                                        <div class="modal-body">
+                                                            <div id="generatedIacModalContent" style="height: 400px !important; overflow-y: scroll;"></div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+
+                                            <script>
+                                                $(document).ready(async function() {
+                                                    // EVENT LISTENER FOR "VIEW-PROJECT-METRICS-BTN"
+                                                    $(document).on('click', '#view-project-metrics-btn', async function() {
+                                                        try {
+                                                            const projectName = $(this).data('projectName');
+
+                                                            const response = await fetch(`/api/projects/v1/get_project_metrics_by_project_name?project_name=${projectName}`);
+                                                            const projectMetricsResponse = await response.json();
+
+                                                            const projectNameElement = $('#project_name');
+                                                            const diagramUrlElement = $('#diagram_url');
+
+                                                            // Clear existing content
+                                                            projectNameElement.text('');
+                                                            diagramUrlElement.attr('src', '');
+
+                                                            // Update modal content
+                                                            projectNameElement.text(projectMetricsResponse.project);
+                                                            diagramUrlElement.attr('src', projectMetricsResponse.image_url);
+
+                                                            // Show the modal
+                                                            $('#projectMetricsModal').modal('show');
+                                                        } catch (error) {
+                                                            console.error('Error fetching JSON:', error);
+                                                        }
+                                                    });
+
+                                                    // EVENT LISTENER FOR "ANALYSE_DIAGRAM_BTN"
+                                                    $(document).on('click', '#analyse-diagram-btn', async function() {
+                                                        try {
+                                                            Swal.fire({
+                                                                title: "Diagram Analysis",
+                                                                text: "This function will be started processing in the background and may take some time to process. Do you wish to continue?",
+                                                                showDenyButton: true,
+                                                                confirmButtonText: "Yes, Proceed",
+                                                                denyButtonText: "Cancel"
+                                                            }).then(async (result) => {
+                                                                if (result.isConfirmed) {
+                                                                    const projectName = $(this).data('projectName');
+                                                                    const imageUrl = $(this).data('imageUrl');
+
+                                                                    const data = { project_name: projectName, image_url: imageUrl };
+                                                                    const response = await fetch(`/prompt/generate_diagram_analyzis`, {
+                                                                        method: 'POST',
+                                                                        body: JSON.stringify(data),
+                                                                        headers: { 'Content-Type': 'application/json' }
+                                                                    });
+
+                                                                    // Check if response is successful
+                                                                    if (response.ok) {
+                                                                        const responseData = await response.json();
+                                                                        Swal.fire({
+                                                                          title: "Process Started",
+                                                                          text: responseData.message,
+                                                                          icon: "info"
+                                                                        });
+                                                                    } else {
+                                                                        Swal.fire("Error", "Failed to start process", "error");
+                                                                    }
+                                                                } else if (result.isDenied) {
+                                                                    // Swal.fire("Changes are not saved", "", "info");
+                                                                }
+                                                            });
+                                                        } catch (error) {
+                                                            console.error('Error fetching JSON:', error);
+                                                        }
+                                                    });
+
+                                                    // EVENT LISTENER FOR "VIEW-DIAGRAM-ANALYSIS-BTN"
+                                                    $(document).on('click', '#view-diagram-analysis-btn', async function() {
+                                                        try {
+                                                            const projectName = $(this).data('projectName');
+
+                                                            const response = await fetch(`/api/projects/v1/get_diagram_analysis_by_project_name?project_name=${projectName}`);
+                                                            const diagramAnalysisResponse = await response.json();
+
+                                                            const elementDiagramAnalysisContent = $('#diagramAnalysisContent');
+                                                            let formattedContent = diagramAnalysisResponse.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+                                                            elementDiagramAnalysisContent.html(JSON.stringify(formattedContent, null, 2));
+
+                                                            $('#diagramAnalysisModal').modal('show');
+                                                        } catch (error) {
+                                                            console.error('Error fetching JSON:', error);
+                                                        }
+                                                    });
+
+                                                    // EVENT LISTENER FOR "GENERATE_JSON-BTN"
+                                                    $(document).on('click', '#generate-json-btn', async function() {
+                                                        try {
+                                                            Swal.fire({
+                                                                title: "JSON File Generation",
+                                                                text: "This function will be started processing in the background and may take some time to process. Do you wish to continue?",
+                                                                showDenyButton: true,
+                                                                confirmButtonText: "Yes, Proceed",
+                                                                denyButtonText: `Cancel`
+                                                            }).then(async (result) => {
+                                                                if (result.isConfirmed) {
+                                                                    const projectName = '{{ project.project_name }}';
+
+                                                                    const data = { project_name: projectName };
+                                                                    const response = fetch(`/prompt/generate_json`, {
+                                                                        method: 'POST',
+                                                                        body: JSON.stringify(data),
+                                                                        headers: { 'Content-Type': 'application/json' }
+                                                                    });
+                                                                } else if (result.isDenied) {
+                                                                    <!-- Swal.fire("Changes are not saved", "", "info"); -->
+                                                                }
+                                                            });
+                                                        } catch (error) {
+                                                            console.error('Error fetching JSON:', error);
+                                                        }
+                                                    });
+
+                                                    // EVENT LISTENER FOR "VIEW-GENERATED-JSON-BTN"
+                                                    $(document).on('click', '#view-generated-json-btn', async function() {
+                                                        try {
+                                                            const projectName = $(this).data('projectName'); // Retrieve from data attribute
+
+                                                            const response = await fetch(`/api/projects/v1/get_generated_json_by_project_name?project_name=${projectName}`);
+                                                            const generatedJsonResponse = await response.json();
+
+                                                            const processedContent = generatedJsonResponse
+                                                                .replace(/\\n/g, "\n")
+                                                                .replace(/\\/g, " ");
+
+                                                            const processedContent_1 = processedContent.slice(processedContent.indexOf("{"), processedContent.lastIndexOf("}") + 1);
+
+                                                            const elementGeneratedJsonContent = $('#generatedJsonContent');
+                                                            elementGeneratedJsonContent.html(`<pre>${processedContent_1}</pre>`);
+
+                                                            $('#generatedJsonModal').modal('show');
+                                                        } catch (error) {
+                                                            console.error('Error fetching JSON:', error);
+                                                            // Handle error (e.g., display a message to the user)
+                                                        }
+                                                    });
+
+                                                    // EVENT LISTENER FOR 'generate-iac-btn'
+                                                    $(document).on('click', '#generate-iac-btn', async function() {
+                                                        try {
+                                                            Swal.fire({
+                                                                title: "IaC Script Generation",
+                                                                text: "This function will be started processing in the background and may take some time to process. Do you wish to continue?",
+                                                                showDenyButton: true,
+                                                                confirmButtonText: "Yes, Proceed",
+                                                                denyButtonText: `Cancel`
+                                                            }).then(async (result) => {
+                                                                if (result.isConfirmed) {
+                                                                    const projectName = $(this).data('projectName'); // Retrieve from data attribute
+
+                                                                    const data = { project_name: projectName };
+                                                                    const response = fetch(`/prompt/generate_iac`, {
+                                                                        method: 'POST',
+                                                                        body: JSON.stringify(data),
+                                                                        headers: { 'Content-Type': 'application/json' }
+                                                                    });
+                                                                } else if (result.isDenied) {
+                                                                    <!-- Swal.fire("Changes are not saved", "", "info"); -->
+                                                                }
+                                                            });
+                                                        } catch (error) {
+                                                            console.error('Error fetching JSON:', error);
+                                                            Swal.fire('Error!', 'An unexpected error occurred.', 'error');
+                                                        }
+                                                    });
+
+                                                    // EVENT LISTENER FOR "VIEW-GENERATED-IAC-BTN"
+                                                    $(document).on('click', '#view-generated-iac-btn', async function() {
+                                                        try {
+                                                            const projectName = $(this).data('projectName'); // Retrieve from data attribute
+                                                            const response = await fetch(`/api/projects/v1/get_generated_iac_by_project_name?project_name=${projectName}`);
+                                                            const generatedIacResponse = await response.json();
+
+                                                            const processedContent = generatedIacResponse
+                                                                .replace(/\\n/g, "\n")
+                                                                .replace(/\\/g, " ");
+
+                                                            const processedContent_1 = processedContent.slice(processedContent.indexOf("{"), processedContent.lastIndexOf("}") + 1);
+
+                                                            $('#generatedIacModalContent').html(`<pre>${processedContent_1}</pre>`);
+                                                            $('#generatedIacModal').modal('show');
+                                                        } catch (error) {
+                                                            console.error('Error fetching JSON:', error);
+                                                            // Handle error (e.g., display a message to the user)
+                                                        }
+                                                    });
+
+                                                    $('#projectMetricsModal .close').on('click', function() {
+                                                        $('#projectMetricsModal').modal('hide');
+                                                    });
+
+                                                    $('#diagramAnalysisModal .close').on('click', function() {
+                                                        $('#diagramAnalysisModal').modal('hide');
+                                                    });
+
+                                                    $('#generatedJsonModal .close').on('click', function() {
+                                                        $('#generatedJsonModal').modal('hide');
+                                                    });
+
+                                                    $('#generatedIacModal .close').on('click', function() {
+                                                        $('#generatedIacModal').modal('hide');
+                                                    });
+                                                });
+                                            </script>
+                                        </form>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+{% endblock %}

@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block title %}Contact Page{% endblock %}
+
+{% block content %}
+<!-- Page content-->
+<section class="py-5">
+    <div class="container px-5">
+        <!-- Contact form-->
+        <div class="bg-light rounded-3 py-3 px-4 px-md-5 mb-5">
+            <div class="text-center mb-5">
+                <h1 class="fw-bolder">Create New Project</h1>
+            </div>
+
+            <div class="row gx-5 justify-content-center">
+                <div class="col-lg-8 col-xl-6">
+                    <form action="/api/projects/v1/create_project" method="post" enctype="multipart/form-data">
+                        <div class="form-floating mb-3">
+                            <input class="form-control" id="project_name" type="text" name="project_name" placeholder="" required/>
+                            <label for="project_name">Project Name</label>
+                        </div>
+
+                        <div class="form-floating mb-3">
+                            <select class="form-control" id="cloud_service_provider" name="cloud_service_provider" required>
+                              <option value="" disabled selected >- Select -</option>
+                              <option value="1">Microsoft Azure</option>
+                              <option value="2">Amazon Web Services</option>
+                              <option value="3">Google Cloud Platform</option>
+                            </select>
+                            <label for="cloud_service_provider">Cloud Service Provider</label>
+                        </div>
+
+                        <div class="form-floating mb-3">
+                            <textarea class="form-control" id="description" type="text" name="description" placeholder="" style="height: 10rem"></textarea>
+                            <label for="description">Description</label>
+                        </div>
+
+                        <div class="form-floating mb-3">
+                            <label for="file_upload" class="cols-sm-2 control-label">Upload File</label>
+                            <div class="cols-sm-10">
+                                <div class="input-group"><input type="file" name="file_upload" class="form-control" id="file_upload" required></div>
+                            </div>
+                        </div>
+
+                        <div class="d-grid">
+                            <button class="btn btn-primary btn-lg" id="submitButton" type="submit">Submit</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
