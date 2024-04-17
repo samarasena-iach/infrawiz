@@ -45,12 +45,16 @@ def new_project(request: Request):
 
 
 @app.get("/projects_list")
-async def new_project(request: Request):
-    projects = await collection_projects.find().to_list(length=None)
+async def projects_list(request: Request):
+    # projects = await collection_projects.find().to_list(length=None)
+    cursor = collection_projects.find()
+    projects = list(cursor)
     return templates.TemplateResponse("projects_list.html", {"request": request, "projects": projects})
 
 
 @app.post("/projects_list")
-async def new_project(request: Request):
-    projects = await collection_projects.find().to_list(length=None)
+async def projects_list(request: Request):
+    # projects = await collection_projects.find().to_list(length=None)
+    cursor = collection_projects.find()
+    projects = list(cursor)
     return templates.TemplateResponse("projects_list.html", {"request": request, "projects": projects})

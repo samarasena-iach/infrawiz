@@ -27,29 +27,29 @@ async def generate_diagram_analysis(background_tasks: BackgroundTasks, data: Mod
     project_name = data.project_name
     image_url = data.image_url
 
+    existing_project = collection_projects.find_one({"project_name": project_name})
+    if existing_project:
+        # UPDATE EXISTING PROJECT RECORD
+        updated_records = {
+            "project_status": PROJECT_STATUS_PHASE_1_IMAGE_ANALYSIS_IN_PROGRESS
+        }
+
+        update_query = {"$set": updated_records}
+        collection_projects.update_one({"project_name": project_name}, update_query)
+    else:
+        print(f"Project with name '{project_name}' not found.")
+
     background_tasks.add_task(que_generate_diagram_analysis, project_name, image_url)
     # return RedirectResponse("/projects_list")
     return JSONResponse({"message": "Process started in the background"})
 
 
 def que_generate_diagram_analysis(project_name: str, image_url: str):
-    # prompt = (
-    #     "Imagine you are tasked with analyzing a Cloud Architecture Diagram provided via a publicly accessible URL. "
-    #     "Your goal is to generate a comprehensive JSON file containing detailed information extracted from the diagram.\n"
-    #     "Your task involves identifying and capturing various elements present in the diagram, including but not limited to:\n"
-    #     "1. Entities: Identify each entity depicted in the diagram, such as servers, databases, services, etc.\n"
-    #     "2. Relationships: Capture the relationships between entities, represented by arrows or other visual indicators.\n"
-    #     "3. Network Boundaries: Identify network boundaries, segments, clusters, or any delineations of network architecture.\n"
-    #     "4. Terminologies: Extract any relevant terminologies, labels, or annotations associated with the entities or relationships.\n"
-    #     "5. Attributes: Capture any attributes or properties associated with each entity, such as IP addresses, ports, protocols, etc.\n"
-    #     "Your JSON output should be structured hierarchically to represent the multi-level nature of the information. "
-    #     "Each entity should be represented as an object with relevant attributes and relationships.\n"
-    #     "Please use the provided URL to access the Cloud Architecture Diagram for analysis."
-    # )
-
     prompt = (
         "Identify each component and their relevant upstream & downstream components with the sequence"
     )
+
+    # "In the diagram, identify each component and their relevant upstream & downstream components along with the sequence"
 
     response = client.chat.completions.create(
         model=deployment_name,
@@ -87,7 +87,7 @@ def que_generate_diagram_analysis(project_name: str, image_url: str):
 
         # UPDATE EXISTING PROJECT RECORD
         updated_records = {
-            "project_status": PROJECT_STATUS_PHASE_1_IMAGE_ANALYZED,
+            "project_status": PROJECT_STATUS_PHASE_2_IMAGE_ANALYZED,
             "diagram_analysis": response_message
         }
 
@@ -102,12 +102,25 @@ def que_generate_diagram_analysis(project_name: str, image_url: str):
 async def generate_json(background_tasks: BackgroundTasks, data: ProjectName):
     project_name = data.project_name
 
+    existing_project = collection_projects.find_one({"project_name": project_name})
+    if existing_project:
+        # UPDATE EXISTING PROJECT RECORD
+        updated_records = {
+            "project_status": PROJECT_STATUS_PHASE_3_JSON_GENERATION_IN_PROGRESS
+        }
+
+        update_query = {"$set": updated_records}
+        collection_projects.update_one({"project_name": project_name}, update_query)
+    else:
+        print(f"Project with name '{project_name}' not found.")
+
     background_tasks.add_task(queue_generate_json, project_name)
-    return RedirectResponse("/projects_list")
+    # return RedirectResponse("/projects_list")
+    return JSONResponse({"message": "Process started in the background"})
 
 
-async def queue_generate_json(project_name: str):
-    existing_project = await collection_projects.find_one({"project_name": project_name})
+def queue_generate_json(project_name: str):
+    existing_project = collection_projects.find_one({"project_name": project_name})
 
     # ==================================================================================================================
     prompt = (
@@ -236,11 +249,11 @@ async def queue_generate_json(project_name: str):
             "project_name": project_name,
             "generated_json": response_message
         }
-        await collection_generated_json.insert_one(record)
+        collection_generated_json.insert_one(record)
 
         # UPDATE EXISTING PROJECT RECORD
         updated_records = {
-            "project_status": PROJECT_STATUS_PHASE_2_JSON_GENERATED,
+            "project_status": PROJECT_STATUS_PHASE_4_JSON_GENERATED,
             "json_status": JSON_GENERATION_GENERATED,
             "json_data": response_message
         }
@@ -256,12 +269,25 @@ async def queue_generate_json(project_name: str):
 async def generate_iac(background_tasks: BackgroundTasks, data: ProjectName):
     project_name = data.project_name
 
+    existing_project = collection_projects.find_one({"project_name": project_name})
+    if existing_project:
+        # UPDATE EXISTING PROJECT RECORD
+        updated_records = {
+            "project_status": PROJECT_STATUS_PHASE_5_IAC_GENERATION_IN_PROGRESS
+        }
+
+        update_query = {"$set": updated_records}
+        collection_projects.update_one({"project_name": project_name}, update_query)
+    else:
+        print(f"Project with name '{project_name}' not found.")
+
     background_tasks.add_task(queue_generate_iac, project_name)
-    return RedirectResponse("/projects_list")
+    # return RedirectResponse("/projects_list")
+    return JSONResponse({"message": "Process started in the background"})
 
 
-async def queue_generate_iac(project_name: str):
-    existing_project = await collection_projects.find_one({"project_name": project_name})
+def queue_generate_iac(project_name: str):
+    existing_project = collection_projects.find_one({"project_name": project_name})
 
     # ==================================================================================================================
     prompt = (
@@ -450,11 +476,11 @@ async def queue_generate_iac(project_name: str):
             "project_name": project_name,
             "generated_iac": response_message
         }
-        await collection_generated_iac.insert_one(record)
+        collection_generated_iac.insert_one(record)
 
         # UPDATE EXISTING PROJECT RECORD
         updated_records = {
-            "project_status": PROJECT_STATUS_PHASE_3_IAC_GENERATED,
+            "project_status": PROJECT_STATUS_PHASE_6_IAC_GENERATED,
             "iac_status": IAC_GENERATION_GENERATED,
             "iac_data": response_message
         }

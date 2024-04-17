@@ -55,14 +55,14 @@ async def create_project(project_name: str = Form(...),
         "created_date": datetime.datetime.now().strftime("%Y-%m-%d")
     }
     # Add record to 'projects' mongo collection
-    await collection_projects.insert_one(record)
+    collection_projects.insert_one(record)
 
     return RedirectResponse("/projects_list")
 
 
 @router.get("/get_project_metrics_by_project_name")
-async def get_project_metrics_by_project_name(project_name: str):
-    existing_project = await collection_projects.find_one({"project_name": project_name})
+def get_project_metrics_by_project_name(project_name: str):
+    existing_project = collection_projects.find_one({"project_name": project_name})
 
     if existing_project:
         image_url = existing_project.get('image_url')
@@ -71,8 +71,8 @@ async def get_project_metrics_by_project_name(project_name: str):
 
 
 @router.get("/get_diagram_analysis_by_project_name")
-async def get_diagram_analysis_by_project_name(project_name: str):
-    existing_project = await collection_projects.find_one({"project_name": project_name})
+def get_diagram_analysis_by_project_name(project_name: str):
+    existing_project = collection_projects.find_one({"project_name": project_name})
 
     if existing_project:
         diagram_analysis = existing_project.get('diagram_analysis')
@@ -83,8 +83,8 @@ async def get_diagram_analysis_by_project_name(project_name: str):
 
 
 @router.get("/get_generated_json_by_project_name")
-async def get_generated_json_by_project_name(project_name: str):
-    existing_project = await collection_projects.find_one({"project_name": project_name})
+def get_generated_json_by_project_name(project_name: str):
+    existing_project = collection_projects.find_one({"project_name": project_name})
 
     if existing_project:
         generated_json = existing_project.get('json_data')
@@ -94,8 +94,8 @@ async def get_generated_json_by_project_name(project_name: str):
 
 
 @router.get("/get_generated_iac_by_project_name")
-async def get_generated_iac_by_project_name(project_name: str):
-    existing_project = await collection_projects.find_one({"project_name": project_name})
+def get_generated_iac_by_project_name(project_name: str):
+    existing_project = collection_projects.find_one({"project_name": project_name})
 
     if existing_project:
         generated_iac = existing_project.get('iac_data')
