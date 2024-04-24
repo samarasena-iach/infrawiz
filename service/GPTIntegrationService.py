@@ -1,5 +1,6 @@
 from configurations.db import *
 from configurations.openai import *
+from bson import ObjectId
 
 
 def prompt_generate_diagram_analysis(image_url: str):
@@ -37,8 +38,8 @@ def prompt_generate_diagram_analysis(image_url: str):
     return response_message
 
 
-def prompt_generate_json(project_name: str):
-    existing_project = collection_projects.find_one({"project_name": project_name})
+def prompt_generate_json(project_id: str):
+    existing_project = collection_projects.find_one({"_id": ObjectId(project_id)})
 
     # ==================================================================================================================
     prompt = (
@@ -164,8 +165,8 @@ def prompt_generate_json(project_name: str):
     return response_message
 
 
-def prompt_generate_iac(project_name: str):
-    existing_project = collection_projects.find_one({"project_name": project_name})
+def prompt_generate_iac(project_id: str):
+    existing_project = collection_projects.find_one({"_id": ObjectId(project_id)})
 
     # ==================================================================================================================
     prompt = (

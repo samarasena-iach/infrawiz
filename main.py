@@ -10,6 +10,7 @@ from configurations.db import *
 from configurations.openai import *
 from controller import ProjectController as project_controller
 from controller import PromptController as prompt_controller
+from bson import ObjectId
 
 
 app = FastAPI(title="InfraWiz",
@@ -58,3 +59,12 @@ async def projects_list(request: Request):
     cursor = collection_projects.find()
     projects = list(cursor)
     return templates.TemplateResponse("projects_list.html", {"request": request, "projects": projects})
+
+
+@app.get("/view_generated_json/{project_id}")
+async def view_generated_json(request: Request, project_id: str):
+    existing_project = collection_projects.find_one({"_id": ObjectId(project_id)})
+
+    if existing_project:
+        json_content = {"project": existing_project.get('project_name'), "generated_json": existing_project.get('json_data'), "img": existing_project.get('image_url')}
+        return templates.TemplateResponse("view_generated_json.html", {"request": request, "json_content": json_content})

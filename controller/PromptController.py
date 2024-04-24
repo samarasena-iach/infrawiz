@@ -5,6 +5,7 @@ from configurations.db import *
 from configurations.openai import *
 from util.constants import *
 import service.GPTIntegrationService as GptIntegrationService
+from bson import ObjectId
 
 router = APIRouter()
 
@@ -14,21 +15,21 @@ def read_root():
     return {"message": "Inside Prompt Controller"}
 
 
-class ProjectName(BaseModel):
-    project_name: str
+class ProjectId(BaseModel):
+    project_id: str
 
 
 class ModelDiagramAnalysis(BaseModel):
-    project_name: str
+    project_id: str
     image_url: str
 
 
 @router.post("/generate_diagram_analyzis")
 async def generate_diagram_analysis(background_tasks: BackgroundTasks, data: ModelDiagramAnalysis):
-    project_name = data.project_name
+    project_id = data.project_id
     image_url = data.image_url
 
-    existing_project = collection_projects.find_one({"project_name": project_name})
+    existing_project = collection_projects.find_one({"_id": ObjectId(project_id)})
     if existing_project:
         # UPDATE EXISTING PROJECT RECORD
         updated_records = {
@@ -36,24 +37,25 @@ async def generate_diagram_analysis(background_tasks: BackgroundTasks, data: Mod
         }
 
         update_query = {"$set": updated_records}
-        collection_projects.update_one({"project_name": project_name}, update_query)
+        collection_projects.update_one({"_id": ObjectId(project_id)}, update_query)
     else:
-        print(f"Project with name '{project_name}' not found.")
+        print(f"Project with id '{project_id}' not found.")
 
-    background_tasks.add_task(que_generate_diagram_analysis, project_name, image_url)
+    background_tasks.add_task(que_generate_diagram_analysis, project_id, image_url)
     # return RedirectResponse("/projects_list")
     return JSONResponse({"message": "Process started in the background"})
 
 
-def que_generate_diagram_analysis(project_name: str, image_url: str):
-    existing_project = collection_projects.find_one({"project_name": project_name})
+def que_generate_diagram_analysis(project_id: str, image_url: str):
+    existing_project = collection_projects.find_one({"_id": ObjectId(project_id)})
 
     if existing_project:
         response_message = GptIntegrationService.prompt_generate_diagram_analysis(image_url)
 
         # ADD RECORD TO "COLLECTION_GENERATED_DIAGRAM_ANALYSIS"
         record = {
-            "project_name": project_name,
+            "project_id": existing_project.get("_id"),
+            "project_name": existing_project.get('project_name'),
             "generated_diagram_analysis": response_message
         }
         collection_generated_diagram_analysis.insert_one(record)
@@ -65,17 +67,17 @@ def que_generate_diagram_analysis(project_name: str, image_url: str):
         }
 
         update_query = {"$set": updated_records}
-        collection_projects.update_one({"project_name": project_name}, update_query)
+        collection_projects.update_one({"_id": ObjectId(project_id)}, update_query)
 
     else:
-        print(f"Project with name '{project_name}' not found.")
+        print(f"Project with id '{project_id}' not found.")
 
 
 @router.post("/generate_json")
-async def generate_json(background_tasks: BackgroundTasks, data: ProjectName):
-    project_name = data.project_name
+async def generate_json(background_tasks: BackgroundTasks, data: ProjectId):
+    project_id = data.project_id
 
-    existing_project = collection_projects.find_one({"project_name": project_name})
+    existing_project = collection_projects.find_one({"_id": ObjectId(project_id)})
     if existing_project:
         # UPDATE EXISTING PROJECT RECORD
         updated_records = {
@@ -83,24 +85,25 @@ async def generate_json(background_tasks: BackgroundTasks, data: ProjectName):
         }
 
         update_query = {"$set": updated_records}
-        collection_projects.update_one({"project_name": project_name}, update_query)
+        collection_projects.update_one({"_id": ObjectId(project_id)}, update_query)
     else:
-        print(f"Project with name '{project_name}' not found.")
+        print(f"Project with id '{project_id}' not found.")
 
-    background_tasks.add_task(queue_generate_json, project_name)
+    background_tasks.add_task(queue_generate_json, project_id)
     # return RedirectResponse("/projects_list")
     return JSONResponse({"message": "Process started in the background"})
 
 
-def queue_generate_json(project_name: str):
-    existing_project = collection_projects.find_one({"project_name": project_name})
+def queue_generate_json(project_id: str):
+    existing_project = collection_projects.find_one({"_id": ObjectId(project_id)})
 
     if existing_project:
-        response_message = GptIntegrationService.prompt_generate_json(project_name)
+        response_message = GptIntegrationService.prompt_generate_json(project_id)
 
         # ADD RECORD TO "COLLECTION_GENERATED_JSON"
         record = {
-            "project_name": project_name,
+            "project_id": existing_project.get("_id"),
+            "project_name": existing_project.get('project_name'),
             "generated_json": response_message
         }
         collection_generated_json.insert_one(record)
@@ -113,17 +116,17 @@ def queue_generate_json(project_name: str):
         }
 
         update_query = {"$set": updated_records}
-        collection_projects.update_one({"project_name": project_name}, update_query)
+        collection_projects.update_one({"_id": ObjectId(project_id)}, update_query)
 
     else:
-        print(f"Project with name '{project_name}' not found.")
+        print(f"Project with id '{project_id}' not found.")
 
 
 @router.post("/generate_iac")
-async def generate_iac(background_tasks: BackgroundTasks, data: ProjectName):
-    project_name = data.project_name
+async def generate_iac(background_tasks: BackgroundTasks, data: ProjectId):
+    project_id = data.project_id
 
-    existing_project = collection_projects.find_one({"project_name": project_name})
+    existing_project = collection_projects.find_one({"_id": ObjectId(project_id)})
     if existing_project:
         # UPDATE EXISTING PROJECT RECORD
         updated_records = {
@@ -131,24 +134,25 @@ async def generate_iac(background_tasks: BackgroundTasks, data: ProjectName):
         }
 
         update_query = {"$set": updated_records}
-        collection_projects.update_one({"project_name": project_name}, update_query)
+        collection_projects.update_one({"_id": ObjectId(project_id)}, update_query)
     else:
-        print(f"Project with name '{project_name}' not found.")
+        print(f"Project with id '{project_id}' not found.")
 
-    background_tasks.add_task(queue_generate_iac, project_name)
+    background_tasks.add_task(queue_generate_iac, project_id)
     # return RedirectResponse("/projects_list")
     return JSONResponse({"message": "Process started in the background"})
 
 
-def queue_generate_iac(project_name: str):
-    existing_project = collection_projects.find_one({"project_name": project_name})
+def queue_generate_iac(project_id: str):
+    existing_project = collection_projects.find_one({"_id": ObjectId(project_id)})
 
     if existing_project:
-        response_message = GptIntegrationService.prompt_generate_iac(project_name)
+        response_message = GptIntegrationService.prompt_generate_iac(project_id)
 
         # ADD RECORD TO "COLLECTION_GENERATED_IAC"
         record = {
-            "project_name": project_name,
+            "project_id": existing_project.get("_id"),
+            "project_name": existing_project.get('project_name'),
             "generated_iac": response_message
         }
         collection_generated_iac.insert_one(record)
@@ -161,7 +165,7 @@ def queue_generate_iac(project_name: str):
         }
 
         update_query = {"$set": updated_records}
-        collection_projects.update_one({"project_name": project_name}, update_query)
+        collection_projects.update_one({"_id": ObjectId(project_id)}, update_query)
 
     else:
-        print(f"Project with name '{project_name}' not found.")
+        print(f"Project with id '{project_id}' not found.")

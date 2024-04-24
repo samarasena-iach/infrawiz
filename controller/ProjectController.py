@@ -4,6 +4,7 @@ from util.constants import *
 from configurations.db import *
 from service.ImageStorageService import *
 import datetime
+from bson import ObjectId
 
 router = APIRouter()
 
@@ -60,45 +61,46 @@ async def create_project(project_name: str = Form(...),
     return RedirectResponse("/projects_list")
 
 
-@router.get("/get_project_metrics_by_project_name")
-def get_project_metrics_by_project_name(project_name: str):
-    existing_project = collection_projects.find_one({"project_name": project_name})
+@router.get("/get_project_metrics_by_project_id")
+def get_project_metrics_by_project_id(project_id: str):
+    existing_project = collection_projects.find_one({"_id": ObjectId(project_id)})
 
     if existing_project:
+        project_name = existing_project.get('project_name')
         image_url = existing_project.get('image_url')
         json_content = {"project": project_name, "image_url": image_url}
         return json_content
 
 
-@router.get("/get_diagram_analysis_by_project_name")
-def get_diagram_analysis_by_project_name(project_name: str):
-    existing_project = collection_projects.find_one({"project_name": project_name})
+@router.get("/get_diagram_analysis_by_project_id")
+def get_diagram_analysis_by_project_id(project_id: str):
+    existing_project = collection_projects.find_one({"_id": ObjectId(project_id)})
 
     if existing_project:
         diagram_analysis = existing_project.get('diagram_analysis')
-        json_content = {"project": project_name, "diagram_analysis": diagram_analysis}
+        json_content = {"project": existing_project.get('project_name'), "diagram_analysis": diagram_analysis}
         analyze_content = json_content["diagram_analysis"]
         formatted_content = analyze_content.replace("\n", "<br>")
         return formatted_content
 
 
-@router.get("/get_generated_json_by_project_name")
-def get_generated_json_by_project_name(project_name: str):
-    existing_project = collection_projects.find_one({"project_name": project_name})
+@router.get("/get_generated_json_by_project_id")
+def get_generated_json_by_project_id(project_id: str):
+    existing_project = collection_projects.find_one({"_id": ObjectId(project_id)})
 
     if existing_project:
         generated_json = existing_project.get('json_data')
-        json_content = {"project": project_name, "generated_json": generated_json}
+        json_content = {"project": existing_project.get('project_name'), "generated_json": generated_json}
         analyze_content = json_content["generated_json"]
         return analyze_content
 
 
-@router.get("/get_generated_iac_by_project_name")
-def get_generated_iac_by_project_name(project_name: str):
-    existing_project = collection_projects.find_one({"project_name": project_name})
+@router.get("/get_generated_iac_by_project_id")
+def get_generated_iac_by_project_id(project_id: str):
+    existing_project = collection_projects.find_one({"_id": ObjectId(project_id)})
 
     if existing_project:
         generated_iac = existing_project.get('iac_data')
-        json_content = {"project": project_name, "generated_iac": generated_iac}
+        json_content = {"project": existing_project.get('project_name'), "generated_iac": generated_iac}
         analyze_content = json_content["generated_iac"]
         return analyze_content
