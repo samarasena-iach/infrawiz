@@ -53,7 +53,8 @@ async def create_project(project_name: str = Form(...),
         "iac_status": IAC_GENERATION_PENDING,
         "json_data": "-",
         "iac_data": "-",
-        "created_date": datetime.datetime.now().strftime("%Y-%m-%d")
+        # "created_date": datetime.datetime.now().strftime("%Y-%m-%d")
+        "created_date": datetime.datetime.now()
     }
     # Add record to 'projects' mongo collection
     collection_projects.insert_one(record)
@@ -77,11 +78,14 @@ def get_diagram_analysis_by_project_id(project_id: str):
     existing_project = collection_projects.find_one({"_id": ObjectId(project_id)})
 
     if existing_project:
-        diagram_analysis = existing_project.get('diagram_analysis')
-        json_content = {"project": existing_project.get('project_name'), "diagram_analysis": diagram_analysis}
-        analyze_content = json_content["diagram_analysis"]
-        formatted_content = analyze_content.replace("\n", "<br>")
-        return formatted_content
+        diagram_analysis = existing_project.get('diagram_analysis').replace("\n", "<br>")
+        json_content = {
+            "project": existing_project.get('project_name'),
+            "cloud_service_provider": existing_project.get('cloud_service_provider'),
+            "time_elapsed": existing_project.get('time_elapsed_diagram_analysis'),
+            "diagram_analysis": diagram_analysis
+        }
+        return json_content
 
 
 @router.get("/get_generated_json_by_project_id")
@@ -90,9 +94,13 @@ def get_generated_json_by_project_id(project_id: str):
 
     if existing_project:
         generated_json = existing_project.get('json_data')
-        json_content = {"project": existing_project.get('project_name'), "generated_json": generated_json}
-        analyze_content = json_content["generated_json"]
-        return analyze_content
+        json_content = {
+            "project": existing_project.get('project_name'),
+            "cloud_service_provider": existing_project.get('cloud_service_provider'),
+            "time_elapsed": existing_project.get('time_elapsed_json_generation'),
+            "generated_json": generated_json
+        }
+        return json_content
 
 
 @router.get("/get_generated_iac_by_project_id")
@@ -101,6 +109,10 @@ def get_generated_iac_by_project_id(project_id: str):
 
     if existing_project:
         generated_iac = existing_project.get('iac_data')
-        json_content = {"project": existing_project.get('project_name'), "generated_iac": generated_iac}
-        analyze_content = json_content["generated_iac"]
-        return analyze_content
+        json_content = {
+            "project": existing_project.get('project_name'),
+            "cloud_service_provider": existing_project.get('cloud_service_provider'),
+            "time_elapsed": existing_project.get('time_elapsed_iac_generation'),
+            "generated_iac": generated_iac
+        }
+        return json_content

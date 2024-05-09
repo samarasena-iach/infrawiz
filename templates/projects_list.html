@@ -44,7 +44,7 @@
                                 <tr>
                                     <td><small>{{ project.project_name }}</small></td>
                                     <td><small>{{ project.cloud_service_provider }}</small></td>
-                                    <td><small>{{ project.image_url }}</small></td>
+                                    <td><a href="#" id="view-project-metrics-btn" data-toggle="modal" data-target="#projectMetricsModal" data-project-id="{{ project._id }}"><small>{{ project.image_url }}</small></a></td>
                                     <!-- <td><img src="{{ project.image_url }}" alt="Project Image" width="100"></td> -->
                                     <!-- <td>{{ project.created_date }}</td> -->
 
@@ -70,7 +70,7 @@
 
                                     <td>
                                         <form>
-                                            <button class="btn btn-primary extra-small-btn" type="button" title="View Project Information" id="view-project-metrics-btn" data-toggle="modal" data-target="#projectMetricsModal" data-project-id="{{ project._id }}"><i class="bi bi-info-circle"></i></button>
+<!--                                            <button class="btn btn-primary extra-small-btn" type="button" title="View Project Information" id="view-project-metrics-btn" data-toggle="modal" data-target="#projectMetricsModal" data-project-id="{{ project._id }}"><i class="bi bi-info-circle"></i></button>-->
 
                                             {% if project.project_status == 1 %}
                                                 <!-- 'ANALYSE DIAGRAM' BUTTON -->
@@ -133,6 +133,8 @@
                                                             </button>
                                                         </div>
                                                         <div class="modal-body">
+                                                            <strong><div id="diagramAnalysisProjectDetails"></div></strong>
+                                                            <strong><div id="diagramAnalysisTimeElapsed"></div></strong><br>
                                                             <div id="diagramAnalysisContent" style="height: 400px !important; overflow-y: scroll;"></div>
                                                         </div>
                                                     </div>
@@ -150,6 +152,8 @@
                                                             </button>
                                                         </div>
                                                         <div class="modal-body">
+                                                            <strong><div id="generatedJsonProjectDetails"></div></strong>
+                                                            <strong><div id="generatedJsonTimeElapsed"></div></strong><br>
                                                             <div id="generatedJsonContent" style="height: 400px !important; overflow-y: scroll;"></div>
                                                         </div>
                                                     </div>
@@ -167,7 +171,9 @@
                                                             </button>
                                                         </div>
                                                         <div class="modal-body">
-                                                            <div id="generatedIacModalContent" style="height: 400px !important; overflow-y: scroll;"></div>
+                                                            <strong><div id="generatedIacProjectDetails"></div></strong>
+                                                            <strong><div id="generatedIacTimeElapsed"></div></strong><br>
+                                                            <div id="generatedIacContent" style="height: 400px !important; overflow-y: scroll;"></div>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -253,8 +259,15 @@
                                                             const response = await fetch(`/api/projects/v1/get_diagram_analysis_by_project_id?project_id=${projectId}`);
                                                             const diagramAnalysisResponse = await response.json();
 
+                                                            const elementProjectDetails = $('#diagramAnalysisProjectDetails')
+                                                            elementProjectDetails.html("Project : " + diagramAnalysisResponse.project + " ["+ diagramAnalysisResponse.cloud_service_provider +"] ");
+
+                                                            const elementTimeElapsed = $('#diagramAnalysisTimeElapsed')
+                                                            elementTimeElapsed.html("Time elapsed : " + diagramAnalysisResponse.time_elapsed + " seconds");
+
                                                             const elementDiagramAnalysisContent = $('#diagramAnalysisContent');
-                                                            let formattedContent = diagramAnalysisResponse.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+                                                            let content = diagramAnalysisResponse.diagram_analysis
+                                                            let formattedContent = content.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
                                                             elementDiagramAnalysisContent.html(JSON.stringify(formattedContent, null, 2));
 
                                                             $('#diagramAnalysisModal').modal('show');
@@ -313,7 +326,14 @@
                                                             const response = await fetch(`/api/projects/v1/get_generated_json_by_project_id?project_id=${projectId}`);
                                                             const generatedJsonResponse = await response.json();
 
-                                                            const processedContent = generatedJsonResponse
+                                                            const elementProjectDetails = $('#generatedJsonProjectDetails')
+                                                            elementProjectDetails.html("Project : " + generatedJsonResponse.project + " ["+ generatedJsonResponse.cloud_service_provider +"] ");
+
+                                                            const elementTimeElapsed = $('#generatedJsonTimeElapsed')
+                                                            elementTimeElapsed.html("Time elapsed : " + generatedJsonResponse.time_elapsed + " seconds");
+
+                                                            let content = generatedJsonResponse.generated_json
+                                                            const processedContent = content
                                                                 .replace(/\\n/g, "\n")
                                                                 .replace(/\\/g, " ");
 
@@ -380,13 +400,20 @@
                                                             const response = await fetch(`/api/projects/v1/get_generated_iac_by_project_id?project_id=${projectId}`);
                                                             const generatedIacResponse = await response.json();
 
-                                                            const processedContent = generatedIacResponse
+                                                            const elementProjectDetails = $('#generatedIacProjectDetails')
+                                                            elementProjectDetails.html("Project : " + generatedIacResponse.project + " ["+ generatedIacResponse.cloud_service_provider +"] ");
+
+                                                            const elementTimeElapsed = $('#generatedIacTimeElapsed')
+                                                            elementTimeElapsed.html("Time elapsed : " + generatedIacResponse.time_elapsed + " seconds");
+
+                                                            let content = generatedIacResponse.generated_iac
+                                                            const processedContent = content
                                                                 .replace(/\\n/g, "\n")
                                                                 .replace(/\\/g, " ");
 
                                                             const processedContent_1 = processedContent.slice(processedContent.indexOf("{"), processedContent.lastIndexOf("}") + 1);
+                                                            $('#generatedIacContent').html(`<pre>${processedContent_1}</pre>`);
 
-                                                            $('#generatedIacModalContent').html(`<pre>${processedContent_1}</pre>`);
                                                             $('#generatedIacModal').modal('show');
                                                         } catch (error) {
                                                             console.error('Error fetching JSON:', error);
