@@ -35,7 +35,8 @@ async def create_project(project_name: str = Form(...),
     with open(f"static/images/uploads/{file_upload.filename}", "wb") as f:
         f.write(file_content)
 
-    local_path = f"C:\\Projects\\Python\\fastapi_jinja_website\\static\\images\\uploads\\{file_upload.filename}"
+    # local_path = f"C:\\Projects\\Python\\fastapi_jinja_website\\static\\images\\uploads\\{file_upload.filename}"
+    local_path = f"static/images/uploads/{file_upload.filename}"
 
     # Upload the static image (saved locally in previous step) to the Azure Blob Storage
     # Azure Blob Storage will return Public access URL for the uploaded image
