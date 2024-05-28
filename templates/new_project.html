@@ -39,7 +39,7 @@
                         <div class="cols-sm-9">
                             <div class="input-group">
                                 <input type="file" name="file_upload" class="form-control" id="file_upload" required>
-                                <button class="btn btn-info btn-xs" id="uploadButton" type="button">Upload</button>
+                               <!--  <button class="btn btn-info btn-xs" id="uploadButton" type="button">Upload</button> -->
                             </div>
                         </div>
                     </div>
@@ -51,9 +51,25 @@
             </div>
 
             <div class="col-lg-4 col-xl-6">
-                <img class="img-fluid rounded mb-5 mb-lg-0" src="#" alt="..." />
+                <img class="img-fluid rounded mb-5 mb-lg-0" id="uploaded_img" src="" alt="" />
             </div>
         </div>
     </div>
 </section>
+
+<script>
+    // Add event listener to file input
+    document.getElementById('file_upload').addEventListener('change', function(event) {
+        var file = event.target.files[0];
+        var reader = new FileReader();
+
+        reader.onload = function(e) {
+            // Set the src attribute of the image element to the data URL
+            document.getElementById('uploaded_img').src = e.target.result;
+        };
+
+        reader.readAsDataURL(file);
+    });
+</script>
+
 {% endblock %}
