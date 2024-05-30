@@ -17,10 +17,10 @@ from pymongo import MongoClient
 
 # MongoDB Params
 # Connection Str - Local Env
-MONGO_URI = os.getenv('MONGO_URI_LOCALENV')
+# MONGO_URI = os.getenv('MONGO_URI_LOCALENV')
 
 # Connection Str - Cloud Env
-# MONGO_URI = os.getenv('MONGO_URI_CLOUDENV')
+MONGO_URI = os.getenv('MONGO_URI_CLOUDENV')
 
 client = MongoClient(MONGO_URI)
 db = client["infrawiz"]
