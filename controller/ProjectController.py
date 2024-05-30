@@ -9,11 +9,6 @@ from bson import ObjectId
 router = APIRouter()
 
 
-@router.get("/")
-def read_root():
-    return {"message": "Inside Project Controller"}
-
-
 @router.post("/create_project")
 async def create_project(project_name: str = Form(...),
                          cloud_service_provider: str = Form(...),

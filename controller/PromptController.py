@@ -11,11 +11,6 @@ import datetime
 router = APIRouter()
 
 
-@router.get("/")
-def read_root():
-    return {"message": "Inside Prompt Controller"}
-
-
 class ProjectId(BaseModel):
     project_id: str
 
