@@ -1,11 +1,21 @@
+from dotenv import load_dotenv
 import os
 from openai import AzureOpenAI
 
-# Azure OpenAI Params
-api_base = os.getenv("AZURE_OPENAI_ENDPOINT")
-api_key = os.getenv("AZURE_OPENAI_API_KEY")
-deployment_name = 'infrawiz-gpt-4-vision-preview-integration'
-api_version = '2023-12-01-preview'  # this might change in the future
+# Load environment variables from .env file
+load_dotenv()
+
+# Azure OpenAI Params - Local Env
+api_base = os.getenv('AZURE_OPENAI_ENDPOINT_LOCALENV')
+api_key = os.getenv('AZURE_OPENAI_API_KEY_LOCALENV')
+deployment_name = os.getenv('AZURE_OPENAI_DEPLOYMENT_NAME_LOCALENV')
+api_version = os.getenv('AZURE_OPENAI_API_VERSION_LOCALENV')
+
+# Azure OpenAI Params - Cloud Env
+# api_base = os.getenv("AZURE_OPENAI_ENDPOINT_CLOUDENV")
+# api_key = os.getenv("AZURE_OPENAI_API_KEY_CLOUDENV")
+# deployment_name = os.getenv('AZURE_OPENAI_DEPLOYMENT_NAME_CLOUDENV')
+# api_version = os.getenv('AZURE_OPENAI_API_VERSION_CLOUDENV')
 
 client = AzureOpenAI(
     api_key=api_key,

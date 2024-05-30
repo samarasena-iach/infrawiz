@@ -11,11 +11,17 @@
 # collection_generated_json = db["generated_json"]
 # collection_generated_iac = db["generated_iac"]
 
-
+from dotenv import load_dotenv
+import os
 from pymongo import MongoClient
 
 # MongoDB Params
-MONGO_URI = "mongodb://localhost:27017"
+# Connection Str - Local Env
+MONGO_URI = os.getenv('MONGO_URI_LOCALENV')
+
+# Connection Str - Cloud Env
+# MONGO_URI = os.getenv('MONGO_URI_CLOUDENV')
+
 client = MongoClient(MONGO_URI)
 db = client["infrawiz"]
 
